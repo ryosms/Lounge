@@ -1,0 +1,3 @@
+[submodule "yukizuri"]
+	path = yukizuri
+	url = https://github.com/a-know/yukizuri.git
