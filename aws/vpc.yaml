@@ -1,0 +1,214 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: create yukizuri vpc
+Parameters:
+  VpcName:
+    Type: String
+    Default: yukizuri-vpc
+  VpcCidrBlocl:
+    Type: String
+    Default: 10.1.1.0/24
+  AzNameA:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Default: ap-northeast-1a
+  AzNameC:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Default: ap-northeast-1c
+  AzNameD:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Default: ap-northeast-1d
+  CidrPublicA:
+    Type: String
+    Default: 10.1.1.0/28
+  CidrPublicC:
+    Type: String
+    Default: 10.1.1.16/28
+  CidrPublicD:
+    Type: String
+    Default: 10.1.1.32/28
+  CidrPrivateA:
+    Type: String
+    Default: 10.1.1.128/28
+  CidrPrivateC:
+    Type: String
+    Default: 10.1.1.160/28
+  CidrPrivateD:
+    Type: String
+    Default: 10.1.1.192/28
+  ProjectTagKey:
+    Type: String
+    Default: project
+  ProjectName:
+    Type: String
+    Default: yukizuri
+
+Resources:
+  YukizuriVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidrBlocl
+      EnableDnsHostnames: yes
+      EnableDnsSupport: yes
+      Tags:
+        - Key: Name
+          Value: !Ref VpcName
+        - Key: !Ref ProjectTagKey
+          Value: !Ref ProjectName
+
+  YukizuriVpcGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${VpcName}-gateway
+        - Key: !Ref ProjectTagKey
+          Value: !Ref ProjectName
+  YukizuriVpcGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref YukizuriVpc
+      InternetGatewayId: !Ref YukizuriVpcGateway
+
+  YukizuriVpcRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref YukizuriVpc
+      Tags:
+        - Key: Name
+          Value: !Sub ${VpcName}-routetable
+        - Key: !Ref ProjectTagKey
+          Value: !Ref ProjectName
+  YukizuriVpcRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref YukizuriVpcRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref YukizuriVpcGateway
+
+  # subnet
+  YukizuriPublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref YukizuriVpc
+      CidrBlock: !Ref CidrPublicA
+      AvailabilityZone: !Ref AzNameA
+      Tags:
+        - Key: Name
+          Value: !Sub ${VpcName}-public-subnet-a
+        - key: !Ref ProjectTagKey
+          Value: !Ref ProjectName
+  YukizuriPublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref YukizuriVpc
+      CidrBlock: !Ref CidrPublicC
+      AvailabilityZone: !Ref AzNameC
+      Tags:
+        - Key: Name
+          Value: !Sub ${VpcName}-public-subnet-c
+        - key: !Ref ProjectTagKey
+          Value: !Ref ProjectName
+  YukizuriPublicSubnetD:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref YukizuriVpc
+      CidrBlock: !Ref CidrPublicD
+      AvailabilityZone: !Ref AzNameD
+      Tags:
+        - Key: Name
+          Value: !Sub ${VpcName}-public-subnet-a
+        - key: !Ref ProjectTagKey
+          Value: !Ref ProjectName
+
+  YukizuriPrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref YukizuriVpc
+      CidrBlock: !Ref CidrPrivateA
+      AvailabilityZone: !Ref AzNameA
+      Tags:
+        - Key: Name
+          Value: !Sub ${VpcName}-private-subnet-a
+        - key: !Ref ProjectTagKey
+          Value: !Ref ProjectName
+  YukizuriPrivateSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref YukizuriVpc
+      CidrBlock: !Ref CidrPrivateC
+      AvailabilityZone: !Ref AzNameC
+      Tags:
+        - Key: Name
+          Value: !Sub ${VpcName}-private-subnet-c
+        - key: !Ref ProjectTagKey
+          Value: !Ref ProjectName
+  YukizuriPrivateSubnetD:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref YukizuriVpc
+      CidrBlock: !Ref CidrPrivateD
+      AvailabilityZone: !Ref AzNameD
+      Tags:
+        - Key: Name
+          Value: !Sub ${VpcName}-private-subnet-d
+        - key: !Ref ProjectTagKey
+          Value: !Ref ProjectName
+
+  AttachRouteA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref YukizuriVpcRouteTable
+      SubnetId: !Ref CidrPublicA
+  AttachRouteC:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref YukizuriVpcRouteTable
+      SubnetId: !Ref CidrPublicC
+  AttachRouteD:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref YukizuriVpcRouteTable
+      SubnetId: !Ref CidrPublicD
+
+  # S3 endpoint
+  YukizuriS3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub "com.amazonaws:${AWS::Region}.s3"
+      VpcEndpointType: Gateway
+      VpcId: !Ref YukizuriVpc
+      RouteTableIds:
+        - !Ref YukizuriVpcRouteTable
+
+Outputs:
+  VpcId:
+    Value: !Ref YukizuriVpc
+    Export:
+      Name: YukizuriVpcId
+  DefaultSecurityGroupId:
+    Value: !GetAtt YukizuriVpc.DefaultSecurityGroup
+    Export:
+      Name: YukizuriVpcDefaultSecurityGroupId
+  PublicSubnetIdA:
+    Value: !Ref YukizuriPublicSubnetA
+    Export:
+      Name: YukizuriPublicSubnetAId
+  PublicSubnetIdC:
+    Value: !Ref YukizuriPublicSubnetC
+    Export:
+      Name: YukizuriPublicSubnetCId
+  PublicSubnetIdD:
+    Value: !Ref YukizuriPublicSubnetD
+    Export:
+      Name: YukizuriPublicSubnetDId
+  PrivateSubnetIdA:
+    Value: !Ref YukizuriPrivateSubnetA
+    Export:
+      Name: YukizuriPrivateSubnetAId
+  PrivateSubnetIdC:
+    Value: !Ref YukizuriPrivateSubnetC
+    Export:
+      Name: YukizuriPrivateSubnetCId
+  PrivateSubnetIdD:
+    Value: !Ref YukizuriPrivateSubnetD
+    Export:
+      Name: YukizuriPrivateSubnetDId
