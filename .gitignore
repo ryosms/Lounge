@@ -22,3 +22,6 @@
 ### IntelliJ
 .idea
 *.iml
+
+### credentials
+.env

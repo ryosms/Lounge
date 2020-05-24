@@ -1,0 +1,13 @@
+---
+version: '3.7'
+services:
+  deploy:
+    build:
+      context: deploy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/lounge
+    command: /bin/bash
+    env_file:
+      - .env
+    tty: yes
