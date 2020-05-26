@@ -1,4 +1,5 @@
 FROM golang:1.14 as builder
+LABEL maintainer="ryosms <ryo.sms@gmail.com>"
 
 WORKDIR /yukizuri
 COPY yukizuri /yukizuri
