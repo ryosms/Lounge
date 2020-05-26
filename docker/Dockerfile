@@ -1,4 +1,5 @@
 FROM golang:1.14 as builder
+MAINTAINER ryosms
 
 WORKDIR /yukizuri
 COPY yukizuri /yukizuri
