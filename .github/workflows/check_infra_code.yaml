@@ -1,12 +1,10 @@
-name: Blank workflow
+name: Check infra code
 
 on: [push]
 
 jobs:
   lint:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v1
     - uses: brpaz/hadolint-action@master
