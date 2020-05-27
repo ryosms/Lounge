@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: create ecs resources for yukizuri
+Parameters:
+  ProjectTagKey:
+    Type: String
+    Default: project
+  ProjectName:
+    Type: String
+    Default: yukizuri
+
+Resources:
+  YukizuriDockerRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: yukizuri
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Delete untagged images.",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "sinceImagePushed",
+                  "countUnit": "days",
+                  "countNumber": 1
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+
+  YukizuriEcsCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: yukizuri-cluster
+      Tags:
+        - Key: !Ref ProjectTagKey
+          Value: !Ref ProjectName
+
+  YukizuriLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/ecs/${YukizuriEcsCluster}"
+      RetentionInDays: 90
+
+  YukizuriEcsTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: yukizuri-ecs-task-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "ecs-tasks.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+        - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+      Tags:
+        - Key: !Ref ProjectTagKey
+          Value: !Ref ProjectName
+
+Outputs:
+  YukizuriLogGroupName:
+    Value: !Ref YukizuriLogGroup
+    Export:
+      Name: YukizuriEcsLogGroupName
+  YukizuriTaskRoleName:
+    Value: !Ref YukizuriEcsTaskRole
+    Export:
+      Name: YukizuriTaskRoleName
+  YukizuriTaskRoleArn:
+    Value: !GetAtt YukizuriEcsTaskRole.Arn
+    Export:
+      Name: YukizuriTaskRoleArn
