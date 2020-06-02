@@ -94,7 +94,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${VpcName}-public-subnet-a
-        - key: !Ref ProjectTagKey
+        - Key: !Ref ProjectTagKey
           Value: !Ref ProjectName
   YukizuriPublicSubnetC:
     Type: AWS::EC2::Subnet
@@ -105,7 +105,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${VpcName}-public-subnet-c
-        - key: !Ref ProjectTagKey
+        - Key: !Ref ProjectTagKey
           Value: !Ref ProjectName
   YukizuriPublicSubnetD:
     Type: AWS::EC2::Subnet
@@ -116,7 +116,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${VpcName}-public-subnet-a
-        - key: !Ref ProjectTagKey
+        - Key: !Ref ProjectTagKey
           Value: !Ref ProjectName
 
   YukizuriPrivateSubnetA:
@@ -128,7 +128,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${VpcName}-private-subnet-a
-        - key: !Ref ProjectTagKey
+        - Key: !Ref ProjectTagKey
           Value: !Ref ProjectName
   YukizuriPrivateSubnetC:
     Type: AWS::EC2::Subnet
@@ -139,7 +139,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${VpcName}-private-subnet-c
-        - key: !Ref ProjectTagKey
+        - Key: !Ref ProjectTagKey
           Value: !Ref ProjectName
   YukizuriPrivateSubnetD:
     Type: AWS::EC2::Subnet
@@ -150,30 +150,30 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${VpcName}-private-subnet-d
-        - key: !Ref ProjectTagKey
+        - Key: !Ref ProjectTagKey
           Value: !Ref ProjectName
 
   AttachRouteA:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref YukizuriVpcRouteTable
-      SubnetId: !Ref CidrPublicA
+      SubnetId: !Ref YukizuriPublicSubnetA
   AttachRouteC:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref YukizuriVpcRouteTable
-      SubnetId: !Ref CidrPublicC
+      SubnetId: !Ref YukizuriPublicSubnetC
   AttachRouteD:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref YukizuriVpcRouteTable
-      SubnetId: !Ref CidrPublicD
+      SubnetId: !Ref YukizuriPublicSubnetD
 
   # S3 endpoint
   YukizuriS3Endpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
-      ServiceName: !Sub "com.amazonaws:${AWS::Region}.s3"
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.s3"
       VpcEndpointType: Gateway
       VpcId: !Ref YukizuriVpc
       RouteTableIds:
