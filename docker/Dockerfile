@@ -7,6 +7,7 @@ COPY yukizuri /yukizuri
 RUN mkdir -p /yukizuri/out \
     && go get github.com/jessevdk/go-assets-builder \
     && make build \
+    && mv images/Yukizuri-logo.png images/yukizuri-logo.png \
     && cp -r css/ fonts/ images/ js/ plugins/ yukizuri.bin /yukizuri/out
 
 
